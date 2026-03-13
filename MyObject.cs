@@ -149,7 +149,8 @@ public class MyObject
                 g--;
                 if (g < 0) g = 0;
             }
-            myBuffer.SetChar((int)Position.X, (int)Position.Y, (char)960, "\u001b[97m");
+            //myBuffer.SetChar((int)Position.X, (int)Position.Y, (char)960, "\u001b[97m");
+            myBuffer.SetChar((int)Position.X, (int)Position.Y, 'O', "\u001b[97m");
             Drawing = false;
         }
     }

@@ -3,7 +3,7 @@ using ConsoleBreakOut;
 
 public static class BreakOutGameBuffer
 {
-    public static void Start(int screenWidth = 80, int screenHeight = 25)
+    public static void Start(int screenWidth = 80, int screenHeight = 25, bool soundOn = false)
     {
         var myBuffer = new MyBuffer(screenWidth, screenHeight);
         var myObject = new MyObject(10, 5);
@@ -17,6 +17,21 @@ public static class BreakOutGameBuffer
         var batSpeed = 8;
         float speed  = 1f;
 
+        var bricks = new List<MyBrick>();
+        var offset = 0;
+        var numBrickPerWidth = screenWidth / 10;
+        for (int i = 0; i < numBrickPerWidth; i++)
+        {
+            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 2)));
+            offset += 9;
+        }
+        offset = 0;
+        for (int i = 0; i < numBrickPerWidth; i++)
+        {
+            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 5), 1));
+            offset += 9;
+        }
+
         myBuffer.Clear();
         Console.CursorVisible = false;
         myBuffer.WriteCentered(screenHeight - 1, "Pong Game - Press X to exit", screenWidth, string.Empty);
@@ -28,22 +43,31 @@ public static class BreakOutGameBuffer
             if (ballPos.X > screenWidth - 2)
             {
                 direction.X = -speed;
-                Task.Run(() => Console.Beep(440, 500));
+                if(soundOn) Task.Run(() => Console.Beep(440, 500));
             }
             //if (ballPos.Y > screenHeight - 2) direction.Y = -speed;
 
             if (ballPos.X < 1)
             {
                 direction.X = speed;
-                Task.Run(() => Console.Beep(440, 500));
+                if (soundOn) Task.Run(() => Console.Beep(440, 500));
             }
             if (ballPos.Y < 1)
             {
                 direction.Y = speed;
-                Task.Run(() => Console.Beep(440, 500));
+                if (soundOn) Task.Run(() => Console.Beep(440, 500));
             }
             
             lastBallPos = new MyPoint(ballPos);
+
+            foreach (var b in bricks)
+            {
+                if(b.CheckCollusion(ballPos))
+                {
+                    direction.Y = -speed;
+                    break;
+                }
+            }
 
             ballPos.X += direction.X;
             ballPos.Y += direction.Y;
@@ -53,15 +77,19 @@ public static class BreakOutGameBuffer
                 ballPos.Y += direction.Y;
                 score += 10;
                 myObject.AddTrailPoint(new MyObjectChar(ballPos, '.'));
-                Task.Run(() => Console.Beep(540, 500));
+                if (soundOn) Task.Run(() => Console.Beep(540, 500));
             }
 
             myBuffer.WriteCentered(0, $"SCORE: {score}", screenWidth, string.Empty);
-
+            
+            foreach (var b in bricks)
+            {
+                b.DrawToBuffer(myBuffer);
+            }
             myObject.DrawToBuffer(myBuffer);
             if (ballPos.Y == screenHeight - 2)
             {
-                Task.Run(() => Console.Beep(240, 800));
+                if (soundOn) Task.Run(() => Console.Beep(240, 800));
                 myBuffer.SetChar((int)lastBallPos.X, (int)lastBallPos.Y, ' ', string.Empty);
                 myBuffer.WriteCentered((int)(ballPos.Y / 2), "GAME OVER!!!", screenWidth, string.Empty);
                 break;

@@ -23,6 +23,8 @@ static async Task ShowMainMenu(int screenWidth, int screenHeight, MyBuffer myBuf
 
     while (true)
     {
+        screenWidth = Console.WindowWidth;
+        screenHeight = Console.WindowHeight;
         MyUIHelper.BuildMenu(5, 5, 40, 6, menuItems, myBuffer);
         myBuffer.Render();
         var getSelection = Console.ReadKey(); // Wait for user input before closing the console
