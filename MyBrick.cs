@@ -3,11 +3,11 @@
     public class MyBrick
     {
         public MyPoint Position { get; set; }
-        public int RowIndex { get; }
+        public int RowIndex { get; set; }
         public int Width { get; }
         public int Height { get; }
 
-        public MyBrick(int width, int height, MyPoint myPoint, int rowIndex = 0)
+        public MyBrick(int width, int height, MyPoint myPoint, int rowIndex = 1)
         {
             Width = width;
             Height = height;
@@ -50,12 +50,26 @@
             }
         }
 
+        public void ClearToBuffer(MyBuffer myBuffer)
+        {
+            //Random random = new Random();
+            //var colorId = random.Next(colors.Length);
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    myBuffer.SetChar((int)Position.X + x, (int)Position.Y + y, ' ');
+                }
+            }
+        }
+
         public bool CheckCollusion(MyPoint ballPos)
         {
             if (ballPos.X >= Position.X && ballPos.X < Position.X + Width)
             {
                 if (ballPos.Y >= Position.Y && ballPos.Y < Position.Y + Height)
                 {
+                    RowIndex = 0;
                     return true;
                 }
             }

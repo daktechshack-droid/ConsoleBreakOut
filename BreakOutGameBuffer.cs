@@ -22,13 +22,31 @@ public static class BreakOutGameBuffer
         var numBrickPerWidth = screenWidth / 10;
         for (int i = 0; i < numBrickPerWidth; i++)
         {
-            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 2)));
+            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 2), 1));
             offset += 9;
         }
         offset = 0;
         for (int i = 0; i < numBrickPerWidth; i++)
         {
-            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 5), 1));
+            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 5), 2));
+            offset += 9;
+        }
+        offset = 0;
+        for (int i = 0; i < numBrickPerWidth; i++)
+        {
+            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 8), 3));
+            offset += 9;
+        }
+        offset = 0;
+        for (int i = 0; i < numBrickPerWidth; i++)
+        {
+            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 11), 4));
+            offset += 9;
+        }
+        offset = 0;
+        for (int i = 0; i < numBrickPerWidth; i++)
+        {
+            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 14), 5));
             offset += 9;
         }
 
@@ -64,7 +82,11 @@ public static class BreakOutGameBuffer
             {
                 if(b.CheckCollusion(ballPos))
                 {
-                    direction.Y = -speed;
+                    direction.Y = -direction.Y;
+
+                    score += 10 * (5- b.RowIndex);
+                    b.ClearToBuffer(myBuffer);
+                    bricks.Remove(b);                    
                     break;
                 }
             }
