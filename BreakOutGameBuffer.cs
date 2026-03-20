@@ -84,7 +84,17 @@ public static class BreakOutGameBuffer
 
             foreach (var b in bricks)
             {
-                if(b.CheckCollusion(ballPos))
+                if (b.CheckReadyToRemove())
+                {
+                    b.ClearToBuffer(myBuffer);
+                    bricks.Remove(b);
+                    break;
+                }
+            }
+
+            foreach (var b in bricks)
+            {
+                if(b.CheckCollusion(ballPos) && b.State == 0)
                 {
                     direction.Y = -direction.Y;
                     speedY += 0.1f;
@@ -96,7 +106,8 @@ public static class BreakOutGameBuffer
 
                     score += 10 * (5- b.RowIndex);
                     b.ClearToBuffer(myBuffer);
-                    bricks.Remove(b);                    
+                    b.SetHitState();
+                    //bricks.Remove(b);                    
                     break;
                 }
             }

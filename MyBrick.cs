@@ -7,12 +7,15 @@
         public int Width { get; }
         public int Height { get; }
 
+        public int State { get; set; }
+
         public MyBrick(int width, int height, MyPoint myPoint, int rowIndex = 1)
         {
             Width = width;
             Height = height;
             Position = myPoint;
             RowIndex = rowIndex;
+            State = 0;
         }
 
         static string[] colors =
@@ -45,8 +48,24 @@
 
         public void DrawToBuffer(MyBuffer myBuffer)
         {
-            myBuffer.SetString((int)Position.X, (int)Position.Y, topLeft + new string(horizontal, Width - 2) + topRight, colors[RowIndex]);
-            myBuffer.SetString((int)Position.X, (int)Position.Y + 1, bottomLeft + new string(horizontal, Width - 2) + bottomRight, colors[RowIndex]);
+            if (State == 0)
+            {
+                myBuffer.SetString((int)Position.X, (int)Position.Y, topLeft + new string(horizontal, Width - 2) + topRight, colors[RowIndex]);
+                myBuffer.SetString((int)Position.X, (int)Position.Y + 1, bottomLeft + new string(horizontal, Width - 2) + bottomRight, colors[RowIndex]);
+            }
+            else
+            {
+                if(State % 2 == 0)
+                {
+                    myBuffer.SetString((int)Position.X, (int)Position.Y, @"\\\__///", colors[0]);
+                    myBuffer.SetString((int)Position.X, (int)Position.Y + 1, @"///  \\\", colors[2]);
+                }
+                else
+                {
+                    myBuffer.SetString((int)Position.X, (int)Position.Y, new string('_', Width), colors[1]);
+                    myBuffer.SetString((int)Position.X, (int)Position.Y + 1, "\\" + new string(' ', Width - 2) + "/", colors[0]);
+                }
+            }
         }
 
         public void ClearToBuffer(MyBuffer myBuffer)
@@ -68,6 +87,19 @@
                 }
             }
 
+            return false;
+        }
+
+        public void SetHitState()
+        {
+            State = 1;
+        }
+
+        public bool CheckReadyToRemove()
+        {
+            if (State == 0) return false;
+            if (State > 5) return true;
+            State++;
             return false;
         }
     }
