@@ -36,30 +36,24 @@
         //    Position.X += myPoint.X;
         //    Position.Y += myPoint.Y;
         //}
+        char topLeft = '\u250C';   // ┌
+        char topRight = '\u2510';  // ┐
+        char bottomLeft = '\u2514';// └
+        char bottomRight = '\u2518';// ┘
+        char horizontal = '\u2500'; // ─
+        char vertical = '\u2502';   // │
 
         public void DrawToBuffer(MyBuffer myBuffer)
         {
-            //Random random = new Random();
-            //var colorId = random.Next(colors.Length);
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    myBuffer.SetChar((int)Position.X + x, (int)Position.Y + y, '#', colors[RowIndex]);
-                }
-            }
+            myBuffer.SetString((int)Position.X, (int)Position.Y, topLeft + new string(horizontal, Width - 2) + topRight, colors[RowIndex]);
+            myBuffer.SetString((int)Position.X, (int)Position.Y + 1, bottomLeft + new string(horizontal, Width - 2) + bottomRight, colors[RowIndex]);
         }
 
         public void ClearToBuffer(MyBuffer myBuffer)
         {
-            //Random random = new Random();
-            //var colorId = random.Next(colors.Length);
             for (int y = 0; y < Height; y++)
             {
-                for (int x = 0; x < Width; x++)
-                {
-                    myBuffer.SetChar((int)Position.X + x, (int)Position.Y + y, ' ');
-                }
+                myBuffer.SetString((int)Position.X, (int)Position.Y + y, new string(' ', Width));
             }
         }
 
