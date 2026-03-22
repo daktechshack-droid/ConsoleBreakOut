@@ -26,7 +26,7 @@ public class MyObject
 
     public void AddTrailPoint(MyObjectChar point)
     {
-        TrailLength++;
+        //TrailLength++; if you want the trail to keep growing
         Trail.Add(point);
         if (Trail.Count > TrailLength)
         {

@@ -2,12 +2,15 @@
 {
     public class MyBrick
     {
+        const int MaxState = 10;
         public MyPoint Position { get; set; }
         public int RowIndex { get; set; }
         public int Width { get; }
         public int Height { get; }
 
         public int State { get; set; }
+
+        public int FallIndex { get; set; }
 
         public MyBrick(int width, int height, MyPoint myPoint, int rowIndex = 1)
         {
@@ -16,6 +19,7 @@
             Position = myPoint;
             RowIndex = rowIndex;
             State = 0;
+            FallIndex = 0;
         }
 
         static string[] colors =
@@ -55,15 +59,30 @@
             }
             else
             {
-                if(State % 2 == 0)
+                if (State == 1)
                 {
-                    myBuffer.SetString((int)Position.X, (int)Position.Y, @"\\\__///", colors[0]);
+                    myBuffer.SetString((int)Position.X, (int)Position.Y, @"\\\  ///", colors[0]);
                     myBuffer.SetString((int)Position.X, (int)Position.Y + 1, @"///  \\\", colors[2]);
                 }
+                //else if (State == 2)
+                //{
+                //    myBuffer.SetString((int)Position.X, (int)Position.Y, new string('*', Width), colors[1]);
+                //    myBuffer.SetString((int)Position.X, (int)Position.Y + 1, "\\" + new string(' ', Width - 2) + "/", colors[0]);
+                //}
                 else
                 {
-                    myBuffer.SetString((int)Position.X, (int)Position.Y, new string('_', Width), colors[1]);
-                    myBuffer.SetString((int)Position.X, (int)Position.Y + 1, "\\" + new string(' ', Width - 2) + "/", colors[0]);
+                    ClearToBuffer(myBuffer);
+                                
+                    FallIndex++;
+                    var spread = FallIndex * 2 + Width;
+                    var startOffset = spread / 2;
+                    var j = 0;
+                    for (int i = (int)Position.X; i <= (int)Position.X + Width; i++)
+                    {
+                        myBuffer.SetChar((int)Position.X - startOffset + j * FallIndex, (int)Position.Y - FallIndex, '.', colors[1]);
+                        myBuffer.SetChar((int)Position.X - startOffset + j * FallIndex, (int)Position.Y + FallIndex, '.', colors[1]);
+                        j++;
+                    }
                 }
             }
         }
@@ -73,6 +92,18 @@
             for (int y = 0; y < Height; y++)
             {
                 myBuffer.SetString((int)Position.X, (int)Position.Y + y, new string(' ', Width));
+            }
+            if (State > 1)
+            {
+                var spread = FallIndex * 2 + Width;
+                var startOffset = spread / 2;
+                var j = 0;
+                for (int i = (int)Position.X; i <= (int)Position.X + Width; i++)
+                {
+                    myBuffer.SetChar((int)Position.X - startOffset + j * FallIndex, (int)Position.Y - FallIndex, ' ');
+                    myBuffer.SetChar((int)Position.X - startOffset + j * FallIndex, (int)Position.Y + FallIndex, ' ');
+                    j++;
+                }
             }
         }
 
@@ -98,7 +129,7 @@
         public bool CheckReadyToRemove()
         {
             if (State == 0) return false;
-            if (State > 5) return true;
+            if (State >= MaxState) return true;
             State++;
             return false;
         }

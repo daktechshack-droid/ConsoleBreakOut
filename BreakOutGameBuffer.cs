@@ -6,7 +6,7 @@ public static class BreakOutGameBuffer
     public static void Start(int screenWidth = 80, int screenHeight = 25, bool soundOn = false)
     {
         var myBuffer = new MyBuffer(screenWidth, screenHeight);
-        var myObject = new MyObject(screenWidth / 2, screenHeight * 3 / 5);
+        var myObject = new MyObject(screenWidth / 2, screenHeight * 3 / 5, 3);
         var ballPos = myObject.Position;
         var direction = new MyPoint(1, 1);
         var lastBallPos = new MyPoint(ballPos);
@@ -17,39 +17,16 @@ public static class BreakOutGameBuffer
         var batSpeed = 8;
         float speedX = 1f;
         float speedY = 1f;
+        bool WinState = false;
 
         var bricks = new List<MyBrick>();
-        var offset = 0;
         var numBrickPerWidth = screenWidth / 10 + 2;
-        for (int i = 0; i < numBrickPerWidth; i++)
-        {
-            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 2), 1));
-            offset += 8;
-        }
-        offset = 4;
-        for (int i = 0; i < numBrickPerWidth; i++)
-        {
-            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 4), 2));
-            offset += 8;
-        }
-        offset = 0;
-        for (int i = 0; i < numBrickPerWidth; i++)
-        {
-            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 6), 3));
-            offset += 8;
-        }
-        offset = 4;
-        for (int i = 0; i < numBrickPerWidth; i++)
-        {
-            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 8), 4));
-            offset += 8;
-        }
-        offset = 0;
-        for (int i = 0; i < numBrickPerWidth; i++)
-        {
-            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, 10), 5));
-            offset += 8;
-        }
+        CreateBrickRow(bricks, 0, 2, numBrickPerWidth, 1);
+        CreateBrickRow(bricks, 4, 4, numBrickPerWidth, 2);
+        CreateBrickRow(bricks, 0, 6, numBrickPerWidth, 3);
+        CreateBrickRow(bricks, 4, 8, numBrickPerWidth, 4);
+        CreateBrickRow(bricks, 0, 10, numBrickPerWidth, 5);
+        CreateBrickRow(bricks, 4, 12, numBrickPerWidth, 6);
 
         myBuffer.Clear();
         Console.CursorVisible = false;
@@ -63,7 +40,7 @@ public static class BreakOutGameBuffer
             {
                 speedX = 1f;
                 direction.X = -speedX;
-                if(soundOn) Task.Run(() => Console.Beep(440, 500));
+                if (soundOn) Task.Run(() => Console.Beep(440, 500));
             }
             //if (ballPos.Y > screenHeight - 2) direction.Y = -speed;
 
@@ -79,7 +56,7 @@ public static class BreakOutGameBuffer
                 direction.Y = speedY;
                 if (soundOn) Task.Run(() => Console.Beep(440, 500));
             }
-            
+
             lastBallPos = new MyPoint(ballPos);
 
             foreach (var b in bricks)
@@ -92,9 +69,14 @@ public static class BreakOutGameBuffer
                 }
             }
 
+            if (bricks.Count == 0)
+            {
+                WinState = true;
+            }
+
             foreach (var b in bricks)
             {
-                if(b.CheckCollusion(ballPos) && b.State == 0)
+                if (b.CheckCollusion(ballPos) && b.State == 0)
                 {
                     direction.Y = -direction.Y;
                     speedY += 0.1f;
@@ -104,7 +86,7 @@ public static class BreakOutGameBuffer
                     direction.X = Math.Sign(direction.X) * speedX;
                     direction.Y = Math.Sign(direction.Y) * speedX;
 
-                    score += 10 * (5- b.RowIndex);
+                    score += 10 * (5 - b.RowIndex);
                     b.ClearToBuffer(myBuffer);
                     b.SetHitState();
                     //bricks.Remove(b);                    
@@ -119,7 +101,7 @@ public static class BreakOutGameBuffer
             {
                 caught = true;
                 var diff = (ballPos.X - batPos.X);
-                if (diff < batLength / 3) 
+                if (diff < batLength / 3)
                 {
                     if (Math.Sign(direction.X) > 0)
                         direction.X = -direction.X;
@@ -147,12 +129,21 @@ public static class BreakOutGameBuffer
             }
 
             myBuffer.WriteCentered(0, $"SCORE: {score}", screenWidth, string.Empty);
-            
+
             foreach (var b in bricks)
             {
                 b.DrawToBuffer(myBuffer);
             }
             myObject.DrawToBuffer(myBuffer);
+
+            if (WinState)
+            {
+                if (soundOn) Task.Run(() => Console.Beep(240, 800));
+                myBuffer.SetChar((int)lastBallPos.X, (int)lastBallPos.Y, ' ', string.Empty);
+                myBuffer.WriteCentered((int)(ballPos.Y / 2), "You Won, YSY!!!", screenWidth, string.Empty);
+                break;
+            }
+
             if (ballPos.Y >= screenHeight - 2 && !caught)
             {
                 if (soundOn) Task.Run(() => Console.Beep(240, 800));
@@ -175,10 +166,10 @@ public static class BreakOutGameBuffer
                 else if (charPressed == ConsoleKey.A || charPressed == ConsoleKey.LeftArrow)
                 {
                     batLast = new MyPoint(batPos);
-                    if(batPos.X > 0)
+                    if (batPos.X > 0)
                     {
                         batPos.X += -batSpeed;
-                    }                    
+                    }
                 }
                 else if (charPressed == ConsoleKey.X)
                 {
@@ -194,6 +185,17 @@ public static class BreakOutGameBuffer
         Console.ReadKey(true);
 
         MyUIHelper.ClearBox(0, 0, screenWidth, screenHeight, myBuffer);
+    }
+
+    private static int CreateBrickRow(List<MyBrick> bricks, int offset, int row, int numBrickPerWidth, int color)
+    {
+        for (int i = 0; i < numBrickPerWidth; i++)
+        {
+            bricks.Add(new MyBrick(8, 2, new MyPoint(offset, row), color));
+            offset += 8;
+        }
+
+        return offset;
     }
 
     static char topLeft = '\u250C';   // ┌
