@@ -30,7 +30,7 @@ static async Task ShowMainMenu()
         var getSelection = Console.ReadKey(); // Wait for user input before closing the console
         if (getSelection.Key == ConsoleKey.D2)
         {
-            BreakOutGameBuffer.Start(screenWidth, screenHeight);
+            BreakOutGameBuffer.Start(screenWidth, screenHeight, true);
             continue;
         }
         if (getSelection.Key == ConsoleKey.X || getSelection.Key == ConsoleKey.Q)
